@@ -7,6 +7,7 @@ export const openapiSpec = {
       "API d'orchestration du processus de réservation : vérifie l'utilisateur (Identity Service), réserve une place (Inventory Service), traite le paiement (Payment Service) puis confirme ou annule la réservation.",
   },
   servers: [{ url: "http://localhost:3003" }],
+  security: [{ HostToken: [] }],
   paths: {
     "/bookings": {
       get: {
@@ -40,7 +41,7 @@ export const openapiSpec = {
         responses: {
           "201": {
             description:
-              "Processus de réservation exécuté (statut confirmed ou failed selon l'issue)",
+              "Processus de réservation exécuté (voir le champ status pour l'issue)",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/Booking" },
@@ -48,6 +49,7 @@ export const openapiSpec = {
             },
           },
           "400": { description: "Requête invalide" },
+          "401": { description: "Jeton inter-services manquant ou invalide" },
           "502": { description: "Un service dépendant est indisponible" },
         },
       },
@@ -73,6 +75,14 @@ export const openapiSpec = {
     },
   },
   components: {
+    securitySchemes: {
+      HostToken: {
+        type: "apiKey",
+        in: "header",
+        name: "X-Host-Token",
+        description: "Jeton partagé entre les microservices",
+      },
+    },
     parameters: {
       BookingId: {
         name: "id",
@@ -103,7 +113,14 @@ export const openapiSpec = {
           paymentId: { type: "integer", example: 1 },
           status: {
             type: "string",
-            enum: ["confirmed", "failed"],
+            enum: [
+              "pending",
+              "confirmed",
+              "user_not_found",
+              "event_not_found",
+              "no_seats_available",
+              "payment_failed",
+            ],
             example: "confirmed",
           },
           reason: {

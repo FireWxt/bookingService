@@ -1,4 +1,4 @@
-import { PAYMENT_SERVICE_URL } from "../config.js";
+import { HOST_TOKEN, PAYMENT_SERVICE_URL } from "../config.js";
 
 export interface PaymentDto {
   id: number;
@@ -14,7 +14,10 @@ export async function processPayment(
 ): Promise<PaymentDto> {
   const res = await fetch(`${PAYMENT_SERVICE_URL}/payments`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Host-Token": HOST_TOKEN,
+    },
     body: JSON.stringify({ amount, cardNumber }),
   });
   if (!res.ok) {

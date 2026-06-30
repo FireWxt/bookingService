@@ -1,5 +1,6 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
+import { requireHostToken } from "./auth.js";
 import { bookings, createBooking } from "./models/bookingModel.js";
 import { openapiSpec } from "./openapi.js";
 
@@ -11,6 +12,8 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpec));
+
+app.use(requireHostToken);
 
 // Orchestration complète d'une réservation (Identity -> Inventory -> Payment)
 app.post("/bookings", async (req, res) => {
